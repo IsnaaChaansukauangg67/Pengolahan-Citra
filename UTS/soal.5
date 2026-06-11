@@ -1,0 +1,61 @@
+import cv2
+import matplotlib.pyplot as plt
+
+# ======================================
+# Membaca gambar wajah
+# ======================================
+# Ganti "wajah.jpg" dengan nama file Anda
+img = cv2.imread("camera.jpg")
+
+# Cek apakah gambar berhasil dibaca
+if img is None:
+    print("Gambar tidak ditemukan!")
+    exit()
+
+# Konversi ke grayscale
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# ======================================
+# a. Histogram Equalization
+# ======================================
+equalized = cv2.equalizeHist(gray)
+
+# ======================================
+# b. Menghitung Histogram
+# ======================================
+hist_before = cv2.calcHist([gray], [0], None, [256], [0,256])
+hist_after = cv2.calcHist([equalized], [0], None, [256], [0,256])
+
+# ======================================
+# Menampilkan Gambar
+# ======================================
+plt.figure(figsize=(12,8))
+
+# Gambar asli grayscale
+plt.subplot(2,2,1)
+plt.imshow(gray, cmap='gray')
+plt.title("Sebelum Equalization")
+plt.axis("off")
+
+# Gambar hasil equalization
+plt.subplot(2,2,2)
+plt.imshow(equalized, cmap='gray')
+plt.title("Sesudah Equalization")
+plt.axis("off")
+
+# Histogram sebelum
+plt.subplot(2,2,3)
+plt.plot(hist_before)
+plt.title("Histogram Sebelum")
+plt.xlabel("Intensitas Pixel")
+plt.ylabel("Jumlah Pixel")
+
+# Histogram sesudah
+plt.subplot(2,2,4)
+plt.plot(hist_after)
+plt.title("Histogram Sesudah")
+plt.xlabel("Intensitas Pixel")
+plt.ylabel("Jumlah Pixel")
+
+plt.tight_layout()
+plt.show()

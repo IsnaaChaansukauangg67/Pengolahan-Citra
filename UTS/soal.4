@@ -1,0 +1,85 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Membaca gambar
+
+img = cv2.imread("fotogelap.jpeg")
+
+# Cek apakah gambar berhasil dibaca
+if img is None:
+    print("Gambar tidak ditemukan!")
+    exit()
+
+# Konversi BGR ke RGB untuk ditampilkan
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+# Konversi ke grayscale untuk histogram
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# ======================================
+# a. Meningkatkan Brightness
+# ======================================
+brightness = 50  # nilai penambah cahaya beta: besar= makin terang
+
+bright_img = cv2.convertScaleAbs(img, alpha=1, beta=brightness)
+
+# ======================================
+# b. Contrast Stretching
+# ======================================
+# Rumus:
+# ((pixel - min) / (max - min)) * 255
+
+min_val = np.min(gray)
+max_val = np.max(gray)
+
+contrast_stretch = ((gray - min_val) / (max_val - min_val)) * 255
+contrast_stretch = contrast_stretch.astype(np.uint8)
+
+# ======================================
+# Histogram Sebelum
+# ======================================
+hist_before = cv2.calcHist([gray], [0], None, [256], [0,256])
+
+# Histogram Sesudah Contrast Stretching
+hist_after = cv2.calcHist([contrast_stretch], [0], None, [256], [0,256])
+
+# ======================================
+# Menampilkan Gambar
+# ======================================
+plt.figure(figsize=(15,10))
+
+# Gambar asli
+plt.subplot(2,3,1)
+plt.imshow(img_rgb)
+plt.title("Gambar Asli")
+plt.axis("off")
+
+# Brightness
+plt.subplot(2,3,2)
+plt.imshow(cv2.cvtColor(bright_img, cv2.COLOR_BGR2RGB))
+plt.title("Brightness Ditingkatkan")
+plt.axis("off")
+
+# Contrast Stretching
+plt.subplot(2,3,3)
+plt.imshow(contrast_stretch, cmap='gray')
+plt.title("Contrast Stretching")
+plt.axis("off")
+
+# Histogram sebelum
+plt.subplot(2,3,4)
+plt.plot(hist_before)
+plt.title("Histogram Sebelum")
+plt.xlabel("Intensitas Pixel")
+plt.ylabel("Jumlah Pixel")
+
+# Histogram sesudah
+plt.subplot(2,3,5)
+plt.plot(hist_after)
+plt.title("Histogram Sesudah")
+plt.xlabel("Intensitas Pixel")
+plt.ylabel("Jumlah Pixel")
+
+plt.tight_layout()
+plt.show()

@@ -1,0 +1,312 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
+import cv2
+import numpy as np
+
+# ======================================
+# Variabel Global
+# ======================================
+img = None
+processed_img = None
+
+# ======================================
+# Fungsi Menampilkan Gambar
+# ======================================
+def tampilkan_gambar(image, label):
+
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    image_pil = Image.fromarray(image_rgb)
+
+    image_pil = image_pil.resize((250, 300))
+
+    image_tk = ImageTk.PhotoImage(image_pil)
+
+    label.config(image=image_tk)
+
+    label.image = image_tk
+
+# ======================================
+# Pilih Gambar
+# ======================================
+def pilih_gambar():
+
+    global img, processed_img
+
+    file_path = filedialog.askopenfilename(
+        filetypes=[("Image Files", "*.jpg *.png *.jpeg")]
+    )
+
+    if file_path:
+
+        img = cv2.imread(file_path)
+
+        processed_img = img.copy()
+
+        tampilkan_gambar(img, label_asli)
+
+        tampilkan_gambar(processed_img, label_hasil)
+
+# ======================================
+# Grayscale
+# ======================================
+def grayscale():
+
+    global processed_img
+
+    if img is None:
+        return
+
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    processed_img = cv2.cvtColor(
+        gray,
+        cv2.COLOR_GRAY2BGR
+    )
+
+    tampilkan_gambar(processed_img, label_hasil)
+
+# ======================================
+# Brightness
+# ======================================
+def brightness():
+
+    global processed_img
+
+    if img is None:
+        return
+
+    bright = cv2.convertScaleAbs(
+        img,
+        alpha=1,
+        beta=50
+    )
+
+    processed_img = bright
+
+    tampilkan_gambar(processed_img, label_hasil)
+
+# ======================================
+# Contrast
+# ======================================
+def contrast():
+
+    global processed_img
+
+    if img is None:
+        return
+
+    contrast_img = cv2.convertScaleAbs(
+        img,
+        alpha=1.8,
+        beta=0
+    )
+
+    processed_img = contrast_img
+
+    tampilkan_gambar(processed_img, label_hasil)
+
+# ======================================
+# Edge Detection
+# ======================================
+def edge_detection():
+
+    global processed_img
+
+    if img is None:
+        return
+
+    gray = cv2.cvtColor(
+        img,
+        cv2.COLOR_BGR2GRAY
+    )
+
+    edges = cv2.Canny(gray, 100, 200)
+
+    processed_img = cv2.cvtColor(
+        edges,
+        cv2.COLOR_GRAY2BGR
+    )
+
+    tampilkan_gambar(processed_img, label_hasil)
+
+# ======================================
+# Threshold
+# ======================================
+def threshold():
+
+    global processed_img
+
+    if img is None:
+        return
+
+    gray = cv2.cvtColor(
+        img,
+        cv2.COLOR_BGR2GRAY
+    )
+
+    _, thresh = cv2.threshold(
+        gray,
+        127,
+        255,
+        cv2.THRESH_BINARY
+    )
+
+    processed_img = cv2.cvtColor(
+        thresh,
+        cv2.COLOR_GRAY2BGR
+    )
+
+    tampilkan_gambar(processed_img, label_hasil)
+
+# ======================================
+# Reset
+# ======================================
+def reset():
+
+    global processed_img
+
+    if img is None:
+        return
+
+    processed_img = img.copy()
+
+    tampilkan_gambar(processed_img, label_hasil)
+
+# ======================================
+# Simpan Gambar
+# ======================================
+def simpan():
+
+    if processed_img is None:
+        return
+
+    save_path = filedialog.asksaveasfilename(
+        defaultextension=".png",
+        filetypes=[("PNG Files", "*.png"),
+                   ("JPG Files", "*.jpg")]
+    )
+
+    if save_path:
+
+        cv2.imwrite(save_path, processed_img)
+
+        messagebox.showinfo(
+            "Sukses",
+            "Gambar berhasil disimpan!"
+        )
+
+# ======================================
+# GUI
+# ======================================
+root = tk.Tk()
+
+root.title("APLIKASI PENGOLAHAN CITRA DIGITAL")
+
+root.geometry("900x500")
+
+root.configure(bg="#19193b")
+
+# ======================================
+# Judul
+# ======================================
+judul = tk.Label(
+    root,
+    text="APLIKASI PENGOLAHAN CITRA DIGITAL",
+    font=("Arial", 24, "bold"),
+    bg="#19193b",
+    fg="white"
+)
+
+judul.pack(pady=15)
+
+# ======================================
+# Frame Tombol
+# ======================================
+frame_tombol = tk.Frame(root, bg="#19193b")
+
+frame_tombol.pack()
+
+# Tombol
+buttons = [
+    ("Pilih Gambar", pilih_gambar, "#3498db"),
+    ("Grayscale", grayscale, "#2ecc71"),
+    ("Brightness", brightness, "#f39c12"),
+    ("Contrast", contrast, "#9b59b6"),
+    ("Edge Detection", edge_detection, "#e74c3c"),
+    ("Threshold", threshold, "#16a085"),
+    ("Reset", reset, "#95a5a6"),
+    ("Simpan", simpan, "#34495e")
+]
+
+for (text, command, color) in buttons:
+
+    btn = tk.Button(
+        frame_tombol,
+        text=text,
+        command=command,
+        bg=color,
+        fg="white",
+        width=15,
+        height=2,
+        font=("Arial", 10, "bold")
+    )
+
+    btn.pack(side=tk.LEFT, padx=5, pady=10)
+
+# ======================================
+# Frame Gambar
+# ======================================
+frame_gambar = tk.Frame(root, bg="#19193b")
+
+frame_gambar.pack(pady=20)
+
+# Gambar Asli
+frame_asli = tk.Frame(
+    frame_gambar,
+    bg="white",
+    bd=3,
+    relief=tk.GROOVE
+)
+
+frame_asli.grid(row=0, column=0, padx=20)
+
+label_text1 = tk.Label(
+    frame_asli,
+    text="GAMBAR ASLI",
+    font=("Arial", 12, "bold")
+)
+
+label_text1.pack()
+
+label_asli = tk.Label(frame_asli)
+
+label_asli.pack()
+
+# Hasil Pengolahan
+frame_hasil = tk.Frame(
+    frame_gambar,
+    bg="white",
+    bd=3,
+    relief=tk.GROOVE
+)
+
+frame_hasil.grid(row=0, column=1, padx=20)
+
+label_text2 = tk.Label(
+    frame_hasil,
+    text="HASIL PENGOLAHAN",
+    font=("Arial", 12, "bold")
+)
+
+label_text2.pack()
+
+label_hasil = tk.Label(frame_hasil)
+
+label_hasil.pack()
+
+# ======================================
+# Menjalankan GUI
+# ======================================
+root.mainloop()

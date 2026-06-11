@@ -1,0 +1,96 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ======================================
+# Membaca gambar grayscale
+# ======================================
+# Ganti "gambar.jpg" dengan nama file Anda
+img = cv2.imread("maltoz.jpg", cv2.IMREAD_GRAYSCALE)
+
+# Cek apakah gambar berhasil dibaca
+if img is None:
+    print("Gambar tidak ditemukan!")
+    exit()
+
+# ======================================
+# Fungsi Kuantisasi
+# ======================================
+def quantization(image, levels):
+    # Menentukan interval kuantisasi
+    step = 256 // levels
+
+    # Proses kuantisasi
+    quantized = (image // step) * step
+
+    return quantized.astype(np.uint8)
+
+# ======================================
+# Kuantisasi berbagai level
+# ======================================
+img_2 = quantization(img, 2)
+img_4 = quantization(img, 4)
+img_8 = quantization(img, 8)
+img_16 = quantization(img, 16)
+
+# ======================================
+# Menampilkan gambar
+# ======================================
+plt.figure(figsize=(12,8))
+
+# Gambar asli
+plt.subplot(2,3,1)
+plt.imshow(img, cmap='gray')
+plt.title("Asli (256 Level)")
+plt.axis("off")
+
+# 2 level
+plt.subplot(2,3,2)
+plt.imshow(img_2, cmap='gray')
+plt.title("2 Level")
+plt.axis("off")
+
+# 4 level
+plt.subplot(2,3,3)
+plt.imshow(img_4, cmap='gray')
+plt.title("4 Level")
+plt.axis("off")
+
+# 8 level
+plt.subplot(2,3,5)
+plt.imshow(img_8, cmap='gray')
+plt.title("8 Level")
+plt.axis("off")
+
+# 16 level
+plt.subplot(2,3,6)
+plt.imshow(img_16, cmap='gray')
+plt.title("16 Level")
+plt.axis("off")
+
+plt.tight_layout()
+plt.show()
+
+# ======================================
+# Menghitung estimasi ukuran data
+# ======================================
+
+# Jumlah piksel
+jumlah_piksel = img.shape[0] * img.shape[1]
+
+# Fungsi hitung ukuran
+def ukuran_data(level):
+    bit_per_pixel = int(np.log2(level))
+    total_bit = jumlah_piksel * bit_per_pixel
+    total_byte = total_bit / 8
+    return bit_per_pixel, total_byte
+
+# Menampilkan hasil
+print("===== Estimasi Ukuran Data =====")
+
+for level in [2, 4, 8, 16]:
+    bpp, size = ukuran_data(level)
+
+    print(f"\n{level} Level:")
+    print(f"Bit per pixel : {bpp} bit")
+    print(f"Estimasi ukuran data : {size:.2f} byte")
